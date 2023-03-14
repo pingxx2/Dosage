@@ -18,20 +18,22 @@ import java.io.InputStreamReader
 import java.net.URL
 import javax.xml.parsers.DocumentBuilderFactory
 
-var text = ""
+var get_korName = ""
+var get_engName = ""
+var get_max = ""
 
 class MainActivity : AppCompatActivity() {
 
     val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
+    var searchList = arrayListOf<SearchList>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(binding.root)
 
-
-
         // api 불러오기 위한 정보
-        val key = ""
+        val key = "h5zn1OTyCPAyJqjYjEtgnsBE/VGY51K0vNFUretFOgBSdjorG6ISZpAux4bCKTBMFANR7GiIrjYmaJgPyl961Q=="
         val pageNo = "1"
         val numOfRows = "3"
         val type = "xml"
@@ -42,7 +44,12 @@ class MainActivity : AppCompatActivity() {
             val thread = Thread(NetWorkThread(site))
             thread.start()
             thread.join()
-            binding.testText.text = text
+            var searchList = arrayListOf<SearchList>(
+                SearchList(get_korName, get_engName, get_max)
+            )
+            // 어댑터와 연결해서 mainListView에 나타내기
+            val searchAdapter = SearchListAdapter(this, searchList)
+            binding.mainListView.adapter = searchAdapter
         }
 
     }
@@ -66,7 +73,14 @@ class MainActivity : AppCompatActivity() {
                             for(j in 0..elem.attributes.length-1){
                                 map.putIfAbsent(elem.attributes.item(j).nodeName, elem.attributes.item(j).nodeValue)
                             }
-                             text = "${elem.getElementsByTagName("DRUG_CPNT_KOR_NM").item(0).textContent}"
+                            get_korName = "${elem.getElementsByTagName("DRUG_CPNT_KOR_NM").item(0).textContent}"
+                            get_engName = "${elem.getElementsByTagName("DRUG_CPNT_ENG_NM").item(0).textContent}"
+                            get_max = "${elem.getElementsByTagName("DAY_MAX_DOSG_QY").item(0).textContent}"
+
+                            var searchList = arrayListOf<SearchList>(
+                                SearchList(get_korName, get_engName, get_max)
+                            )
+
                             break
                         }
                     }
@@ -79,9 +93,4 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun searchKeyword(txt: String){
-        val textView = TextView(this)
-        textView.text = txt
-        binding.searchLayout.addView(textView, 0)
-    }
 }
