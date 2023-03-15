@@ -22,6 +22,8 @@ var get_korName = ""
 var get_engName = ""
 var get_max = ""
 
+var search_text = ""
+
 class MainActivity : AppCompatActivity() {
 
     val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
@@ -33,14 +35,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // api 불러오기 위한 정보
-        val key = "h5zn1OTyCPAyJqjYjEtgnsBE/VGY51K0vNFUretFOgBSdjorG6ISZpAux4bCKTBMFANR7GiIrjYmaJgPyl961Q=="
+        val key = ""
         val pageNo = "1"
         val numOfRows = "3"
         val type = "xml"
         val site = "http://apis.data.go.kr/1471000/DayMaxDosgQyByIngdService/getDayMaxDosgQyByIngdInq?serviceKey="+
                 key+"&numOfRows="+numOfRows+"&pageNo="+pageNo+"&type="+type
 
+        //버튼 클릭 이벤트
         binding.searchBtn.setOnClickListener{
+            search_text = binding.search.text.toString()
+            searchList.clear()
+
             val thread = Thread(NetWorkThread(site))
             thread.start()
             thread.join()
@@ -73,15 +79,18 @@ class MainActivity : AppCompatActivity() {
                             for(j in 0..elem.attributes.length-1){
                                 map.putIfAbsent(elem.attributes.item(j).nodeName, elem.attributes.item(j).nodeValue)
                             }
-                            get_korName = "${elem.getElementsByTagName("DRUG_CPNT_KOR_NM").item(0).textContent}"
-                            get_engName = "${elem.getElementsByTagName("DRUG_CPNT_ENG_NM").item(0).textContent}"
-                            get_max = "${elem.getElementsByTagName("DAY_MAX_DOSG_QY").item(0).textContent}"
 
-                            var searchList = arrayListOf<SearchList>(
-                                SearchList(get_korName, get_engName, get_max)
-                            )
+                            if("${elem.getElementsByTagName("DRUG_CPNT_KOR_NM").item(0).textContent}".contains(search_text)){
+                                get_korName = "${elem.getElementsByTagName("DRUG_CPNT_KOR_NM").item(0).textContent}"
+                                get_engName = "${elem.getElementsByTagName("DRUG_CPNT_ENG_NM").item(0).textContent}"
+                                get_max = "${elem.getElementsByTagName("DAY_MAX_DOSG_QY").item(0).textContent}"
 
-                            break
+                                var searchList = arrayListOf<SearchList>(
+                                    SearchList(get_korName, get_engName, get_max)
+                                )
+
+                                break
+                            }
                         }
                     }
 
